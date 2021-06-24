@@ -1,4 +1,4 @@
 include ':app',
-        ':modules:module_increment',
+        ':modules:module_increment'
 
-rootProject.name = "My Application"
+rootProject.name = "moduleAnwenBuild"
