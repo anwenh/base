@@ -1,0 +1,4 @@
+include ':app',
+        ':modules:module_increment',
+
+rootProject.name = "My Application"
