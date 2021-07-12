@@ -7,7 +7,6 @@ import android.util.Log;
 import com.antfortune.freeline.FreelineCore;
 import com.antfortune.freeline.router.Router;
 import com.antfortune.freeline.router.schema.CheckResourceSchema;
-import com.antfortune.freeline.router.schema.CheckSyncSchema;
 import com.antfortune.freeline.router.schema.CloseLonglinkSchema;
 import com.antfortune.freeline.router.schema.PushDexSchema;
 import com.antfortune.freeline.router.schema.PushFullResourcePackSchema;
@@ -165,7 +164,6 @@ public class LongLinkServer extends EmbedHttpServer {
     }
 
     private static void initRouter() {
-        sRouter.registerSchema(new CheckSyncSchema());
         sRouter.registerSchema(new CheckResourceSchema());
         sRouter.registerSchema(new CloseLonglinkSchema());
         sRouter.registerSchema(new PushDexSchema());

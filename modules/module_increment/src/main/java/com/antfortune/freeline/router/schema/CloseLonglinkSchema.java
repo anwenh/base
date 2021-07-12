@@ -25,9 +25,6 @@ public class CloseLonglinkSchema implements ISchemaAction {
 
     @Override
     public void handle(String method, String path, HashMap<String, String> headers, Map<String, String> queries, InputStream input, EmbedHttpServer.ResponseOutputStream response) throws Exception {
-        String lastSync = queries.get("lastSync");
-        FreelineCore.saveLastDynamicSyncId(Long.parseLong(lastSync));
-        Log.i(TAG, "save last sync value: " + lastSync);
         boolean forceRestart = queries.containsKey("restart");
         if (forceRestart) {
             Log.i(TAG, "find restart marker, appliacation will restart.");

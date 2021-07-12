@@ -32,22 +32,17 @@ public class FreelineReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String uuid = intent.getStringExtra(UUID);
-        if (FreelineCore.getUuid().equalsIgnoreCase(uuid)) {
-            int type = intent.getIntExtra(ACTION_KEY, -1);
-            String processName = FreelineApplication.getProcessName();
+        int type = intent.getIntExtra(ACTION_KEY, -1);
+        String processName = FreelineApplication.getProcessName();
 
-            Log.i(TAG, "receive action type: " + type+" processName"+processName);
-            if (type == ACTION_UPDATE_ACTIVITY) {
-                saveDynamicResInfo(intent);
-                FreelineCore.updateDynamicTime();
-                ActivityManager.restartForegroundActivity();
-            } else if (type == ACTION_RESTART_APPLICATION) {
-                saveDynamicResInfo(intent);
-                applyDynamicDex(intent);
-                FreelineCore.updateDynamicTime();
-                ActivityManager.restart(FreelineCore.getApplication(), true);
-            }
+        Log.i(TAG, "receive action type: " + type+" processName"+processName);
+        if (type == ACTION_UPDATE_ACTIVITY) {
+            saveDynamicResInfo(intent);
+            ActivityManager.restartForegroundActivity();
+        } else if (type == ACTION_RESTART_APPLICATION) {
+            saveDynamicResInfo(intent);
+            applyDynamicDex(intent);
+            ActivityManager.restart(FreelineCore.getApplication(), true);
         }
     }
 

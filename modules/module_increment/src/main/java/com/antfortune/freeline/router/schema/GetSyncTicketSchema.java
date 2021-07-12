@@ -25,13 +25,8 @@ public class GetSyncTicketSchema implements ISchemaAction {
 
     @Override
     public void handle(String method, String path, HashMap<String, String> headers, Map<String, String> queries, InputStream input, EmbedHttpServer.ResponseOutputStream response) throws Exception {
-        long apkBuildFlag = FreelineCore.getApkBuildFlag();
-        long lastSync = FreelineCore.getLastDynamicSyncId() + apkBuildFlag;
-        Log.i(TAG, "apkBuildFlag: " + apkBuildFlag);
-        Log.i(TAG, "lastSync: " + lastSync);
-
-        String result = "{'apkBuildFlag':"+apkBuildFlag+",'lastSync':"+lastSync+"}";
-
+        Log.i(TAG, "GetSyncTicketSchema: " );
+        String result = "{'apkBuildFlag':"+0+",'lastSync':"+0+",'packageName':"+FreelineCore.getApplication().getPackageName()+"}";
         response.setContentTypeText();
         response.write(result.getBytes("utf-8"));
     }

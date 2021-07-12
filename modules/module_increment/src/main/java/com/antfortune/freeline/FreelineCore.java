@@ -107,16 +107,10 @@ public class FreelineCore {
                 field.setAccessible(true);
                 PathClassLoader origin = (PathClassLoader) field.get(mPackageInfo);
 
-                if (checkVersionChange()) {
-                    Log.i(TAG, "the apk has recover, delete cache");
-                    clearDynamicCache();
-                    clearSyncCache();
-                } else {
-                    Log.i(TAG, "start to inject dex...");
-                    injectDex(origin);
-                    Log.i(TAG, "start to inject resources...");
-                    injectResources();
-                }
+                Log.i(TAG, "start to inject dex...");
+                injectDex(origin);
+                Log.i(TAG, "start to inject resources...");
+                injectResources();
 
                 Log.i(TAG, "start to load hackload.dex...");
                 injectHackDex(app, origin);
@@ -142,55 +136,12 @@ public class FreelineCore {
         sApplication.startService(intent);
     }
 
-    private static String getDynamicDexPath() {
-        return getDynamicInfoSp().getString(DYNAMIC_INFO_DEX_PATH_KEY, null);
-    }
-
     private static String getDynamicDexDirPath() {
         return getDynamicInfoSp().getString(DYNAMIC_INFO_DEX_DIR_KEY, null);
     }
 
     private static String getDynamicDexOptPath() {
         return getDynamicInfoSp().getString(DYNAMIC_INFO_OPT_PATH_KEY, null);
-    }
-
-    public static void clearDynamicCache() {
-        getDynamicInfoSp().edit().clear().commit();
-        FileUtils.rm(new File(getDynamicInfoTempDir()));
-        Log.i(TAG, "clear dynamic info sp cache");
-    }
-
-    public static void clearSyncCache() {
-        getSyncInfoSp().edit().clear().commit();
-        Log.i(TAG, "clear sync info sp cache");
-    }
-
-    public static long getBuildTime(Context context) {
-        // 使用 ApkBuildFlag 作为基点进行对比，判断应用版本是否匹配
-        long buildTime = getApkBuildFlag();
-        Log.i(TAG, "Build Time is: " + buildTime);
-        return buildTime;
-    }
-
-    public static long getApkBuildFlag() {
-        if (sApkBuildFlag == 0) {
-            try {
-                InputStream is = sApplication.getAssets().open("apktime");
-                int size = is.available();
-
-                // Read the entire asset into a local byte buffer.
-                byte[] buffer = new byte[size];
-                is.read(buffer);
-                is.close();
-
-                String text = new String(buffer, "GB2312");
-                Log.i(TAG, "ext:" + text);
-                sApkBuildFlag = Long.parseLong(text);
-            } catch (Exception e) {
-                FreelineCore.printStackTrace(e);
-            }
-        }
-        return sApkBuildFlag;
     }
 
     private static void copyAssets(Context context, String assetName, String strOutFileName) throws IOException {
@@ -216,18 +167,6 @@ public class FreelineCore {
         }
         return dir.getAbsolutePath();
     }
-
-    private static long getDynamicTime() {
-        // 使用 ApkBuildFlag 作为基点进行对比，判断应用版本是否匹配
-        long dynamicTime = getDynamicInfoSp().getLong("dynamicTime", getApkBuildFlag());
-        Log.i(TAG, "Dynamic Time is: " + dynamicTime);
-        return dynamicTime;
-    }
-
-    private static boolean checkVersionChange() {
-        return getBuildTime(sApplication) > getDynamicTime();
-    }
-
 
     private static Object getPackageInfo(Application app) throws NoSuchFieldException,
             IllegalArgumentException, IllegalAccessException {
@@ -330,21 +269,8 @@ public class FreelineCore {
         Log.e(TAG, resultStr);
     }
 
-
-    public static String getDynamicResPath(String packageId) {
-        return getDynamicInfoSp().getString(getDynamicResPathKey(packageId), null);
-    }
-
     private static String getDynamicResPathKey(String packageId) {
         return packageId + ".key";
-    }
-
-    public static long getLastDynamicSyncId() {
-        return getSyncInfoSp().getLong("lastSync", 0);
-    }
-
-    public static void saveLastDynamicSyncId(long sync) {
-        getSyncInfoSp().edit().putLong("lastSync", sync).commit();
     }
 
     private static SharedPreferences getDynamicInfoSp() {
@@ -371,13 +297,6 @@ public class FreelineCore {
 
     public static Application getRealApplication() {
         return sRealApplication;
-    }
-
-    public static void updateDynamicTime() {
-        // 使用 ApkBuildFlag 作为基点进行对比，判断应用版本是否匹配
-        long dynamicTime = getApkBuildFlag();
-        Log.i(TAG, "update dynamic time: " + dynamicTime);
-        getDynamicInfoSp().edit().putLong("dynamicTime", dynamicTime).commit();
     }
 
     /***
@@ -434,10 +353,6 @@ public class FreelineCore {
         return dir.getAbsolutePath();
     }
 
-    public static String getUuid() {
-        return String.valueOf(getApkBuildFlag());
-    }
-
     private static String generateStringMD5(String input) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -469,7 +384,6 @@ public class FreelineCore {
 //        intent.setComponent(new ComponentName("com.antfortune.freeline","com.antfortune.freeline.FreelineReceiver"));
 
         intent.setAction("android.intent.action.FreelineReceiver");
-        intent.putExtra(FreelineReceiver.UUID, getUuid());
         intent.putExtra(FreelineReceiver.ACTION_KEY, FreelineReceiver.ACTION_UPDATE_ACTIVITY);
         intent.putExtra(FreelineReceiver.SP_KEY, bundleName);
         intent.putExtra(FreelineReceiver.SP_VALUE, path);
@@ -481,7 +395,6 @@ public class FreelineCore {
     public static void restartApplication(String bundleName, String path, String dexPath, String dirPath) {
         Intent intent = new Intent();
         intent.setAction("android.intent.action.FreelineReceiver");
-        intent.putExtra(FreelineReceiver.UUID, getUuid());
         intent.putExtra(FreelineReceiver.ACTION_KEY, FreelineReceiver.ACTION_RESTART_APPLICATION);
         intent.putExtra(FreelineReceiver.SP_KEY, bundleName);
         intent.putExtra(FreelineReceiver.SP_VALUE, path);
@@ -495,7 +408,6 @@ public class FreelineCore {
     public static void saveDynamicInfo(String bundleName, String path) {
         Intent intent = new Intent();
         intent.setAction("android.intent.action.FreelineReceiver");
-        intent.putExtra(FreelineReceiver.UUID, getUuid());
         intent.putExtra(FreelineReceiver.ACTION_KEY, FreelineReceiver.ACTION_SAVE_DYNAMIC_INFO);
         intent.putExtra(FreelineReceiver.SP_KEY, bundleName);
         intent.putExtra(FreelineReceiver.SP_VALUE, path);
